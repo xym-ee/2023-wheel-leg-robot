@@ -1,8 +1,8 @@
-#include "motor_can.h"
+#include "iotask/motor_can.h"
 
 #include "stdlib.h"
 
-#include "sbus.h"
+#include "iotask/sbus.h"
 
 /*-------------------------- CAN接收线程 *--------------------------*/
 
@@ -43,8 +43,7 @@ static void can_rx_thread_entry(void *parameter)
 //			rt_kprintf("%d\n", (rt_int32_t)((rxmsg.data[5]<<8)|rxmsg.data[4]));
 //            rt_kprintf("%02x %02x %02x %02x %02x %02x %02x %02x\n",
 //            rxmsg.data[0], rxmsg.data[1],rxmsg.data[2],rxmsg.data[3],
-//            rxmsg.data[4],rxmsg.data[5],rxmsg.data[6],rxmsg.data[7]);        
-        
+//            rxmsg.data[4],rxmsg.data[5],rxmsg.data[6],rxmsg.data[7]);
         }
         
         /* 右侧电机 */
@@ -67,7 +66,8 @@ static void can_tx_thread_entry(void *parameter)
     rt_size_t   size;               /* 接收发送状态 */
     
     /* 存储遥控器控制信息 */
-    rt_int32_t sbus_speed;
+    rt_int32_t lv,rv;
+	rt_uint16_t key;
 	
 	rt_int16_t iqControl;
 	rt_int32_t speedControl;
@@ -76,55 +76,95 @@ static void can_tx_thread_entry(void *parameter)
     msg.ide = RT_CAN_STDID;         /* 标准格式 */
     msg.rtr = RT_CAN_DTR;           /* 数据帧 */
     msg.len = 8;                    /* 数据长度为 8 */
-    
-    msg.id  = 0x141;
-    
-    /* 速度帧的固定数据位 msg.data[4][5][6][7] 为速度值 */
-//    msg.data[0] = 0xA2;             /* 操作码 */
-//     
-//    msg.data[1] = 0x00;
-//    msg.data[2] = 0x00; 
-//    msg.data[3] = 0x00;    
-    
-	
-	
-    /* 转矩控制的固定数据位 msg.data[4][5] 转矩位 */
-    msg.data[0] = 0xA1;             /* 操作码 */
-     
-    msg.data[1] = 0x00;
-    msg.data[2] = 0x00; 
-	msg.data[3] = 0x00;
-
-	msg.data[6] = 0x00;
-	msg.data[7] = 0x00;
-    
-  
-			
+   
+		
     while(1)
     {
         /* 读公共内存，写的话用互斥量保护起来 */
-        sbus_speed      = sbus.rv;      /* 右手前后 */
-
-		/* 转矩控制输出 */
-		iqControl = (sbus_speed - SBUS_CH_OFFSET) * 1000 / SBUS_CH_LENGTH;
-		rt_kprintf("%d\n", iqControl);
-		msg.data[4] = *(rt_uint8_t *)(&iqControl);
-		msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
+        lv  = sbus.lv;      /* 右手前后 */
+		rv  = sbus.rv;      /* 右手前后 */
+		key = sbus.sa;
 		
-//		speedControl = (sbus_speed - SBUS_CH_OFFSET) * 100000 / SBUS_CH_LENGTH;
-//		rt_kprintf("%d\n", speedControl);
-//		msg.data[4] = *(rt_uint8_t *)(&speedControl);
-//		msg.data[5] = *((rt_uint8_t *)(&speedControl)+1);		
-//		msg.data[6] = *((rt_uint8_t *)(&speedControl)+2);
-//		msg.data[7] = *((rt_uint8_t *)(&speedControl)+3);
-		
-		
-		size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
-	
-		if (size == 0)
+		/* 转速控制 */
+		if (key == SBUS_SW_UP)
 		{
-			rt_kprintf("can dev write data failed in left motor!\n");
+			msg.data[0] = 0xA2;             /* 操作码 */
+			 
+			msg.data[1] = 0x00;
+			msg.data[2] = 0x00; 
+			msg.data[3] = 0x00; 			
+			
+			msg.id      = 0x141;
+			speedControl = (lv - SBUS_CH_OFFSET) * 180000 / SBUS_CH_LENGTH;
+
+			msg.data[4] = *(rt_uint8_t *)(&speedControl);
+			msg.data[5] = *((rt_uint8_t *)(&speedControl)+1);		
+			msg.data[6] = *((rt_uint8_t *)(&speedControl)+2);
+			msg.data[7] = *((rt_uint8_t *)(&speedControl)+3);
+			
+			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
+			if (size == 0)
+			{
+				rt_kprintf("can dev write data failed in 1!\n");
+			}
+			
+			msg.id      = 0x142;
+			speedControl = (rv - SBUS_CH_OFFSET) * 180000 / SBUS_CH_LENGTH;
+			
+			msg.data[4] = *(rt_uint8_t *)(&speedControl);
+			msg.data[5] = *((rt_uint8_t *)(&speedControl)+1);		
+			msg.data[6] = *((rt_uint8_t *)(&speedControl)+2);
+			msg.data[7] = *((rt_uint8_t *)(&speedControl)+3);
+			
+			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
+			if (size == 0)
+			{
+				rt_kprintf("can dev write data failed in 2!\n");
+			}
 		}
+		
+		/* 转矩控制 */
+		if (key == SBUS_SW_DOWN)
+		{
+			/* 转矩控制的固定数据位 msg.data[4][5] 转矩位 */
+			msg.data[0] = 0xA1;             /* 操作码 */
+			 
+			msg.data[1] = 0x00;
+			msg.data[2] = 0x00; 
+			msg.data[3] = 0x00;
+
+			msg.data[6] = 0x00;
+			msg.data[7] = 0x00;			
+			
+			
+			msg.id      = 0x141;
+			/* 转矩控制输出 */
+			iqControl = (lv - SBUS_CH_OFFSET) * 500 / SBUS_CH_LENGTH;
+			rt_kprintf("%d\n", iqControl);
+			msg.data[4] = *(rt_uint8_t *)(&iqControl);
+			msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
+			
+			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
+			if (size == 0)
+			{
+				rt_kprintf("can dev write data failed in 3!\n");
+			}	
+			
+			
+			msg.id      = 0x142;
+			/* 转矩控制输出 */
+			iqControl = (rv - SBUS_CH_OFFSET) * 500 / SBUS_CH_LENGTH;
+			rt_kprintf("%d\n", iqControl);
+			msg.data[4] = *(rt_uint8_t *)(&iqControl);
+			msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
+			
+			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
+			if (size == 0)
+			{
+				rt_kprintf("can dev write data failed in 4!\n");
+			}				
+		}		
+		
 		
         rt_thread_mdelay(10);
     }

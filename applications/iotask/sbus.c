@@ -1,4 +1,4 @@
-#include "sbus.h"
+#include "iotask/sbus.h"
 
 
 /* 遥控器按键全局数据 */
@@ -40,8 +40,6 @@ static struct rt_messagequeue rx_mq;
 
 /*--------------------------  DMA中断回调  ---------------------------*/
 
-struct rt_ringbuffer * rb = RT_NULL;
-
 /* 接收数据回调函数 */
 static rt_err_t sbus_uart_input(rt_device_t dev, rt_size_t size)
 {
@@ -67,8 +65,6 @@ static void sbus_thread_entry(void *parameter)
     rt_err_t result;
     rt_uint32_t rx_length;
 	
-	rb = rt_ringbuffer_create(sizeof(rt_uint8_t)*128);
-    
     rt_uint8_t rx_buffer[RT_SERIAL_RB_BUFSZ + 1];
     rt_uint8_t* byte = rx_buffer;                   /* 缓冲区别名 */
     
@@ -85,6 +81,8 @@ static void sbus_thread_entry(void *parameter)
             /* 从串口读取数据*/
             rx_length = rt_device_read(msg.dev, 0, &rx_buffer[data_count], msg.size);
             data_count = data_count + rx_length;
+			
+			rt_kprintf("%d\n",rx_length);
             
             /* 可以使用状态机解包 */
             if (byte[0] == 0x0F)
@@ -142,7 +140,7 @@ int sbus_init(void)
     }
 
     /* 初始化消息队列 */
-    rt_mq_init(&rx_mq, "rx_mq",
+    rt_mq_init(&rx_mq, "mq_sbus",
                msg_pool,                 /* 存放消息的缓冲区 */
                sizeof(struct rx_msg),    /* 一条消息的最大长度 */
                sizeof(msg_pool),         /* 存放消息的缓冲区大小 */

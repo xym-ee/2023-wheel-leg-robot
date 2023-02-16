@@ -390,19 +390,22 @@
               <FilePath>applications\main.c</FilePath>
             </File>
             <File>
-              <FileName>led.c</FileName>
+              <FileName>status.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\applications\led.c</FilePath>
+              <FilePath>.\applications\status.c</FilePath>
             </File>
-            <File>
-              <FileName>motor_can.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\applications\motor_can.c</FilePath>
-            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>controltask</GroupName>
+        </Group>
+        <Group>
+          <GroupName>iotask</GroupName>
+          <Files>
             <File>
               <FileName>sbus.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\applications\sbus.c</FilePath>
+              <FilePath>.\applications\iotask\sbus.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -775,5 +778,14 @@
     <components/>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>project</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>
