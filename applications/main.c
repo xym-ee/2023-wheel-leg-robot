@@ -14,6 +14,8 @@
 
 
 
+#include "iotask/motor_can.h"
+
 int main(void)
 {
 	

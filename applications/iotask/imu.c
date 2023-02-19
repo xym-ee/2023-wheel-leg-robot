@@ -1,88 +1,5 @@
 #include "iotask/imu.h"
 
-/* IMU 状态机解包数据 */
-
-static enum
-{
-    wait_start_byte,
-    wait_data_type,
-	wait_data,
-	wait_sum
-} imu_recive_state = wait_start_byte;
-
-typedef struct 
-{
-	rt_uint8_t start_byte;
-	rt_uint8_t data_type;
-	rt_uint8_t data[8];
-	rt_uint8_t sum;
-}
-
-imu_frame_t;
-
-imu_frame_t imu_frame;
-
-rt_uint8_t imu_unpack(rt_uint8_t ch)
-{
-
-    static rt_uint8_t data_count = 0;
-	
-    switch (imu_recive_state)
-    {
-        case wait_start_byte:
-            if (ch == 0x55)
-            {
-                imu_recive_state = wait_data_type;
-                imu_frame.start_byte = ch;
-            }
-            imu_frame.sum = ch;
-            break;
-
-        case wait_data_type:
-            if (ch == 0x53)
-            {
-                imu_recive_state = wait_data;
-                imu_frame.data_type = ch;
-            }
-            else
-            {
-				imu_recive_state = wait_start_byte;
-				//rt_kprintf("frame head error");
-            }
-			imu_frame.sum += ch;
-            break;
-
-        case wait_data:
-			imu_frame.data[data_count] = ch;
-			data_count++;
-			imu_frame.sum += ch;
-		
-            if (data_count == 8)
-            {
-				imu_recive_state = wait_sum;
-            }
-            break;
-			
-        case wait_sum:
-            if (imu_frame.sum == ch)	/*!< 校准正确返回1 */
-            {
-				imu_recive_state = wait_start_byte;
-				imu_frame.sum = ch;
-                return 1;
-            }
-            else	/*!< 校验错误 */
-            {
-//                qDebug()<<"和校验错误\r\n"<<cksum1;
-				imu_recive_state = wait_start_byte;
-            }
-            break;
-		}
-    return 0;
-}
-
-
-
-
 imu_t imu;
 
 /*--------------------------  控制块  ---------------------------*/
@@ -103,7 +20,7 @@ static struct rt_messagequeue rx_mq;
 
 
 /*--------------------------  DMA中断回调  ---------------------------*/
-
+//200hz回传  5ms
 struct rt_ringbuffer * rb = RT_NULL;
 
 /* 接收数据回调函数 */
@@ -131,10 +48,8 @@ static void imu_thread_entry(void *parameter)
     rt_err_t result;
     rt_uint32_t rx_length;
 	
-	rt_uint8_t ch;
+//	rt_uint8_t ch;
 	
-	rb = rt_ringbuffer_create(sizeof(rt_uint8_t)*128);
-    
     rt_uint8_t rx_buffer[RT_SERIAL_RB_BUFSZ + 1];
     rt_uint8_t* byte = rx_buffer;                   /* 缓冲区别名 */
     
@@ -149,29 +64,27 @@ static void imu_thread_entry(void *parameter)
         if (result == RT_EOK)
         {
             /* 从串口读取数据*/
-            rx_length = rt_device_read(msg.dev, 0, rx_buffer, msg.size);
-            
-			rt_kprintf("%d\n",rx_length);
-            
+            rx_length = rt_device_read(msg.dev, 0, &rx_buffer[data_count], msg.size);
+			data_count = data_count + rx_length;
+                        
             /* 可以使用状态机解包 */
-//            if (byte[0] == 0x55 && byte[1]==0x53)
-//            {
-//                /* 满足帧头才判断帧长 */
-//                if (data_count >= 11) 
-//                {
-//					imu.roll  = (byte[3]<<8 | byte[2])/32768*180.0;
-//					imu.pitch = (byte[3]<<8 | byte[2])/32768*180.0;
-//					imu.yaw   = (byte[3]<<8 | byte[2])/32768*180.0;
-
-
-//                    /* 准备下一数据帧接收 */
-//                    data_count = 0;                
-//                }
-//            }
-//            else /*帧头不对，重新接收等待帧头*/
-//            {
-//                data_count = 0;
-//            }
+            if (byte[0] == 0x55 && byte[1]==0x53)
+            {
+                /* 满足帧头才判断帧长 */
+                if (data_count >= 11) 
+                {
+					imu.roll  = ((rt_int16_t)(byte[3]<<8 | byte[2]))*1800/32768;
+					imu.pitch = ((rt_int16_t)(byte[5]<<8 | byte[4]))*1800/32768;		/* 1.5 deg = 15 舍去低位 */
+					imu.yaw   = ((rt_int16_t)(byte[7]<<8 | byte[6]))*1800/32768;
+					
+                    /* 准备下一数据帧接收 */
+                    data_count = 0;
+                }
+            }
+            else /*帧头不对，重新接收等待帧头*/
+            {
+                data_count = 0;
+            }
         }
     }
 }
@@ -243,8 +156,8 @@ static void imu_debug_thread_entry(void *parameter)
     while (1)
     {
         rt_kprintf("\x1b[2J\x1b[H");
-        rt_kprintf("%d \n", imu.pitch);
-        rt_thread_mdelay(100);
+        rt_kprintf("%d \n", imu.roll);
+        rt_thread_mdelay(50);
     }
 }
 
@@ -261,13 +174,6 @@ static int imu_output(int argc, char *argv[])
 }
 /* 导出到 msh 命令列表中 */
 MSH_CMD_EXPORT(imu_output, remote controller data debug output);
-
-
-
-
-
-
-
 
 
 

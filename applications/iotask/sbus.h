@@ -9,7 +9,7 @@
 #define SBUS_UART       "uart1"
 
 
-#define SBUS_THREAD_PRIORITY         25
+#define SBUS_THREAD_PRIORITY         3
 #define SBUS_THREAD_STACK_SIZE       1024
 #define SBUS_THREAD_TIMESLICE        10
 

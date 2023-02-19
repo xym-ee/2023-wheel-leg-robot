@@ -39,7 +39,7 @@ typedef struct
 	/* 电流给定值 -2000 ~ 2000 */
 	rt_int16_t torque;
 	
-	/* 电流给定值 单位 0.01°/s */
+	/* 速度给定值 单位 0.01°/s */
 	rt_int32_t speed;
 	
 	rt_int32_t position;
@@ -52,9 +52,6 @@ typedef struct
 	motor_sensot_t sensor;
 	motor_control_t control;
 } motor_t;
-
-
-
 
 
 

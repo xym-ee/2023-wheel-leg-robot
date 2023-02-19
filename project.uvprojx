@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>__STDC_LIMIT_MACROS, USE_HAL_DRIVER, RT_USING_LIBC, __CLK_TCK=RT_TICK_PER_SECOND, STM32F427xx, __RTTHREAD__, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>applications;rt-thread\components\libc\compilers\common\include;rt-thread\components\libc\compilers\common\extension;rt-thread\components\libc\compilers\common\extension\fcntl\octal;rt-thread\libcpu\arm\common;rt-thread\libcpu\arm\cortex-m4;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;board;board\CubeMX_Config\Inc;board\ports;libraries\HAL_Drivers;libraries\HAL_Drivers\config;libraries\HAL_Drivers\CMSIS\Include;rt-thread\components\finsh;.;rt-thread\include;libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Inc;libraries\STM32F4xx_HAL\CMSIS\Device\ST\STM32F4xx\Include;rt-thread\components\libc\posix\io\poll;rt-thread\components\libc\posix\io\stdio;rt-thread\components\libc\posix\ipc</IncludePath>
+              <IncludePath>rt-thread\components\libc\compilers\common\extension;board;rt-thread\components\drivers\include;rt-thread\components\drivers\include;applications;libraries\HAL_Drivers\CMSIS\Include;rt-thread\components\drivers\include;rt-thread\components\libc\posix\io\poll;.;libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Inc;board\ports;rt-thread\components\finsh;libraries\HAL_Drivers;libraries\HAL_Drivers\config;rt-thread\libcpu\arm\cortex-m4;board\CubeMX_Config\Inc;rt-thread\components\libc\compilers\common\extension\fcntl\octal;libraries\STM32F4xx_HAL\CMSIS\Device\ST\STM32F4xx\Include;rt-thread\components\libc\posix\io\stdio;rt-thread\components\libc\compilers\common\include;rt-thread\libcpu\arm\common;rt-thread\components\libc\posix\ipc;rt-thread\components\drivers\include;rt-thread\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -390,14 +390,26 @@
               <FilePath>applications\main.c</FilePath>
             </File>
             <File>
-              <FileName>status.c</FileName>
+              <FileName>led.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\applications\status.c</FilePath>
+              <FilePath>.\applications\led.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>controltask</GroupName>
+          <Files>
+            <File>
+              <FileName>pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\controltask\pid.c</FilePath>
+            </File>
+            <File>
+              <FileName>motion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\controltask\motion.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>iotask</GroupName>
@@ -406,6 +418,16 @@
               <FileName>sbus.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\applications\iotask\sbus.c</FilePath>
+            </File>
+            <File>
+              <FileName>imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\iotask\imu.c</FilePath>
+            </File>
+            <File>
+              <FileName>motor_can.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\iotask\motor_can.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -533,6 +555,11 @@
               <FilePath>rt-thread\components\drivers\misc\pin.c</FilePath>
             </File>
             <File>
+              <FileName>rt_drv_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>rt-thread\components\drivers\misc\rt_drv_pwm.c</FilePath>
+            </File>
+            <File>
               <FileName>serial.c</FileName>
               <FileType>1</FileType>
               <FilePath>rt-thread\components\drivers\serial\serial.c</FilePath>
@@ -571,6 +598,11 @@
               <FileName>drv_gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>libraries\HAL_Drivers\drv_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>drv_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>libraries\HAL_Drivers\drv_pwm.c</FilePath>
             </File>
             <File>
               <FileName>drv_usart.c</FileName>
@@ -693,6 +725,11 @@
               <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_pwr_ex.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f4xx_hal_tim_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim_ex.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_hal_rng.c</FileName>
               <FileType>1</FileType>
               <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rng.c</FilePath>
@@ -708,9 +745,19 @@
               <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c</FilePath>
             </File>
             <File>
+              <FileName>stm32f4xx_hal_lptim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_lptim.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32f4xx_hal_rcc_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_rcc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>libraries\STM32F4xx_HAL\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_tim.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_hal_usart.c</FileName>

@@ -2,7 +2,13 @@
 
 #include "stdlib.h"
 
-#include "iotask/sbus.h"
+
+motor_t motor = 
+{
+	.left.control.mode  = MODE_TORQUE,
+	.right.control.mode = MODE_TORQUE,
+	
+};
 
 /*-------------------------- CAN接收线程 *--------------------------*/
 
@@ -40,6 +46,7 @@ static void can_rx_thread_entry(void *parameter)
         /* 左侧电机 */
         if (rxmsg.id == 0x141)
         {
+			motor.left.sensor.speed = (rt_int16_t)((rxmsg.data[5]<<8) | rxmsg.data[4]);
 //			rt_kprintf("%d\n", (rt_int32_t)((rxmsg.data[5]<<8)|rxmsg.data[4]));
 //            rt_kprintf("%02x %02x %02x %02x %02x %02x %02x %02x\n",
 //            rxmsg.data[0], rxmsg.data[1],rxmsg.data[2],rxmsg.data[3],
@@ -49,8 +56,7 @@ static void can_rx_thread_entry(void *parameter)
         /* 右侧电机 */
         if (rxmsg.id == 0x142)
         {
-        
-        
+			motor.right.sensor.speed = (rt_int16_t)((rxmsg.data[5]<<8) | rxmsg.data[4]);
         }
     }
 }
@@ -65,108 +71,55 @@ static void can_tx_thread_entry(void *parameter)
     struct rt_can_msg msg = {0};
     rt_size_t   size;               /* 接收发送状态 */
     
-    /* 存储遥控器控制信息 */
-    rt_int32_t lv,rv;
-	rt_uint16_t key;
-	
 	rt_int16_t iqControl;
-	rt_int32_t speedControl;
-    
+
     /* 速度帧设置 */
     msg.ide = RT_CAN_STDID;         /* 标准格式 */
     msg.rtr = RT_CAN_DTR;           /* 数据帧 */
     msg.len = 8;                    /* 数据长度为 8 */
-   
+	
+	/* 转矩控制的固定数据位 msg.data[4][5] 转矩位 */
+	msg.data[0] = 0xA1;             /* 操作码 */
+	 
+	msg.data[1] = 0x00;
+	msg.data[2] = 0x00; 
+	msg.data[3] = 0x00;
+
+	msg.data[6] = 0x00;
+	msg.data[7] = 0x00;	   
 		
     while(1)
     {
-        /* 读公共内存，写的话用互斥量保护起来 */
-        lv  = sbus.lv;      /* 右手前后 */
-		rv  = sbus.rv;      /* 右手前后 */
-		key = sbus.sa;
+		iqControl = motor.left.control.torque;
+//		rt_kprintf("%d\n", iqControl);
 		
-		/* 转速控制 */
-		if (key == SBUS_SW_UP)
-		{
-			msg.data[0] = 0xA2;             /* 操作码 */
-			 
-			msg.data[1] = 0x00;
-			msg.data[2] = 0x00; 
-			msg.data[3] = 0x00; 			
-			
-			msg.id      = 0x141;
-			speedControl = (lv - SBUS_CH_OFFSET) * 180000 / SBUS_CH_LENGTH;
-
-			msg.data[4] = *(rt_uint8_t *)(&speedControl);
-			msg.data[5] = *((rt_uint8_t *)(&speedControl)+1);		
-			msg.data[6] = *((rt_uint8_t *)(&speedControl)+2);
-			msg.data[7] = *((rt_uint8_t *)(&speedControl)+3);
-			
-			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
-			if (size == 0)
-			{
-				rt_kprintf("can dev write data failed in 1!\n");
-			}
-			
-			msg.id      = 0x142;
-			speedControl = (rv - SBUS_CH_OFFSET) * 180000 / SBUS_CH_LENGTH;
-			
-			msg.data[4] = *(rt_uint8_t *)(&speedControl);
-			msg.data[5] = *((rt_uint8_t *)(&speedControl)+1);		
-			msg.data[6] = *((rt_uint8_t *)(&speedControl)+2);
-			msg.data[7] = *((rt_uint8_t *)(&speedControl)+3);
-			
-			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
-			if (size == 0)
-			{
-				rt_kprintf("can dev write data failed in 2!\n");
-			}
-		}
+		msg.id   = 0x141;	
+		msg.data[4] = *(rt_uint8_t *)(&iqControl);
+		msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
 		
-		/* 转矩控制 */
-		if (key == SBUS_SW_DOWN)
-		{
-			/* 转矩控制的固定数据位 msg.data[4][5] 转矩位 */
-			msg.data[0] = 0xA1;             /* 操作码 */
-			 
-			msg.data[1] = 0x00;
-			msg.data[2] = 0x00; 
-			msg.data[3] = 0x00;
-
-			msg.data[6] = 0x00;
-			msg.data[7] = 0x00;			
-			
-			
-			msg.id      = 0x141;
-			/* 转矩控制输出 */
-			iqControl = (lv - SBUS_CH_OFFSET) * 500 / SBUS_CH_LENGTH;
-			rt_kprintf("%d\n", iqControl);
-			msg.data[4] = *(rt_uint8_t *)(&iqControl);
-			msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
-			
-			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
-			if (size == 0)
-			{
-				rt_kprintf("can dev write data failed in 3!\n");
-			}	
-			
-			
-			msg.id      = 0x142;
-			/* 转矩控制输出 */
-			iqControl = (rv - SBUS_CH_OFFSET) * 500 / SBUS_CH_LENGTH;
-			rt_kprintf("%d\n", iqControl);
-			msg.data[4] = *(rt_uint8_t *)(&iqControl);
-			msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
-			
-			size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
-			if (size == 0)
-			{
-				rt_kprintf("can dev write data failed in 4!\n");
-			}				
-		}		
+		size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
+//		if (size == 0)
+//		{
+//			rt_kprintf("can dev write data failed in left!\n");
+//		}
+		
+		rt_thread_mdelay(1);
 		
 		
-        rt_thread_mdelay(10);
+		iqControl = motor.right.control.torque;
+//		rt_kprintf("%d\n", iqControl);
+		
+		msg.id      = 0x142;
+		msg.data[4] = *(rt_uint8_t *)(&iqControl);
+		msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
+		
+		size = rt_device_write(can_dev, 0, &msg, sizeof(msg));
+//		if (size == 0)
+//		{
+//			rt_kprintf("can dev write data failed in right!\n");
+//		}
+		
+        rt_thread_mdelay(7);
     }
 }
 

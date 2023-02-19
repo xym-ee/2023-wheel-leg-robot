@@ -42,9 +42,9 @@
 
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
-#define RT_CONSOLEBUF_SIZE 128
+#define RT_CONSOLEBUF_SIZE 256
 #define RT_CONSOLE_DEVICE_NAME "uart6"
-#define RT_VER_NUM 0x40101
+#define RT_VER_NUM 0x50000
 #define ARCH_ARM
 #define RT_USING_CPU_FFS
 #define ARCH_ARM_CORTEX_M
@@ -76,9 +76,10 @@
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
-#define RT_SERIAL_RB_BUFSZ 128
+#define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_CAN
 #define RT_USING_PIN
+#define RT_USING_PWM
 
 /* Using USB */
 
@@ -100,9 +101,6 @@
 
 
 /* Utilities */
-
-
-/* RT-Thread Utestcases */
 
 
 /* RT-Thread online packages */
@@ -235,14 +233,21 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART6
-#define BSP_USING_UART7
-#define BSP_UART7_RX_USING_DMA
-#define BSP_USING_UART1
-#define BSP_UART1_RX_USING_DMA
 #define BSP_USING_UART2
 #define BSP_UART2_RX_USING_DMA
+#define BSP_USING_UART3
+#define BSP_USING_UART7
+#define BSP_USING_UART8
+#define BSP_UART8_RX_USING_DMA
+#define BSP_USING_UART1
+#define BSP_UART1_RX_USING_DMA
 #define BSP_USING_CAN
 #define BSP_USING_CAN1
+#define BSP_USING_PWM
+#define BSP_USING_PWM4
+#define BSP_USING_PWM4_CH1
+#define BSP_USING_PWM5
+#define BSP_USING_PWM5_CH4
 
 /* Board extended module Drivers */
 

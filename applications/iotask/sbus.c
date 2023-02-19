@@ -82,7 +82,7 @@ static void sbus_thread_entry(void *parameter)
             rx_length = rt_device_read(msg.dev, 0, &rx_buffer[data_count], msg.size);
             data_count = data_count + rx_length;
 			
-			rt_kprintf("%d\n",rx_length);
+//			rt_kprintf("%d\n",rx_length);
             
             /* 可以使用状态机解包 */
             if (byte[0] == 0x0F)
