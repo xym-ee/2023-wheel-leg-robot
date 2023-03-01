@@ -270,8 +270,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\applications\iotask\imu.c</PathWithFileName>
-      <FilenameWithoutPath>imu.c</FilenameWithoutPath>
+      <PathWithFileName>.\applications\iotask\motor_can.c</PathWithFileName>
+      <FilenameWithoutPath>motor_can.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -282,8 +282,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>.\applications\iotask\motor_can.c</PathWithFileName>
-      <FilenameWithoutPath>motor_can.c</FilenameWithoutPath>
+      <PathWithFileName>.\applications\iotask\imu.c</PathWithFileName>
+      <FilenameWithoutPath>imu.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

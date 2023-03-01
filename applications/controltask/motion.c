@@ -8,40 +8,48 @@
 #include "controltask/pid.h"
 
 
+#define sgn(n)	((double)(n>=0 ? 1.0f:-1.0f))
+
+
+#include <math.h>
+
 /*--------------------------  数据处理线程  ---------------------------*/
 
 static void motion_thread_entry(void *parameter)
 {
-    /* velocity pd controller */
-    double velocity_ref = 0.0;
-    double velocity_feedback = 0.0;
-    controller_t velocity_controller;
+	double e1 = 0.0;
+	double e2 = 0.0;
 
-    controller_set_pid_parameter(&velocity_controller, 65.0, 0.0, 20.0);
-    controller_set_output_limit(&velocity_controller, 3.0);
-
-    /* angle pd controller */
-    double angle_ref = 0.0;
-    double angle_feedback = 0.0;
-    controller_t angle_controller;
-
-    controller_set_pid_parameter(&angle_controller, 7.0, 0, 60.0);
-	controller_set_output_limit(&angle_controller, 1300.0);
+	double e1_l = 0.0;
 	
-	rt_int16_t torque_left;
-	rt_int16_t torque_right;
+	double s;
+	
+	double torque_left;
+	double torque_right;
 	
     while (1)
     {
-		/* angle pd controller.  */
-        angle_feedback = imu.roll; //-200~200
+		/*---------------------------- 数据输入 --------------------------*/
+        e1 = imu.roll*3.141593/1800; //-200~200
 		
-        torque_left  = controller_output(&angle_controller, angle_ref, angle_feedback);
+		/*---------------------------- 控制算法 --------------------------*/
+		e2 = (e1 - e1_l)/0.008;
+		
+		s = e1 + e2;
+		
+		torque_left = -0.0177*2000*(-e2 - sqrt(fabs(s)) * sgn(s));
+		
 		torque_right = -torque_left;
+		
+		e1_l = e1;
 
+		/*---------------------------- 数据输出 --------------------------*/
 		/* 直立输出 */
-		motor.left.control.torque  = torque_left;
-		motor.right.control.torque = torque_right;
+		
+		rt_kprintf("%d\n", (rt_int16_t)torque_left);
+		
+//		motor.left.control.torque  = torque_left;
+//		motor.right.control.torque = torque_right;
 		
 		rt_thread_mdelay(8);
     }

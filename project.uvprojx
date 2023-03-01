@@ -420,14 +420,14 @@
               <FilePath>.\applications\iotask\sbus.c</FilePath>
             </File>
             <File>
-              <FileName>imu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\applications\iotask\imu.c</FilePath>
-            </File>
-            <File>
               <FileName>motor_can.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\applications\iotask\motor_can.c</FilePath>
+            </File>
+            <File>
+              <FileName>imu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\iotask\imu.c</FilePath>
             </File>
           </Files>
         </Group>
