@@ -24,10 +24,16 @@ static void motion_thread_entry(void *parameter)
     /* angle pd controller */
     double angle_ref = 0.0;
     double angle_feedback = 0.0;
-    controller_t angle_controller;
-
-    controller_set_pid_parameter(&angle_controller, 3.5, 0, 28.0);
-	controller_set_output_limit(&angle_controller, 600.0);
+	
+	rt_uint8_t flag = 0;
+	
+    controller_t angle_controller_1;
+    controller_set_pid_parameter(&angle_controller_1, 3.4, 0, 28.0);
+	controller_set_output_limit(&angle_controller_1, 400.0);
+	
+    controller_t angle_controller_2;
+    controller_set_pid_parameter(&angle_controller_2, 2.5, 0, 28.0);
+	controller_set_output_limit(&angle_controller_2, 600.0);	
 	
 	/* 转向速度控制，PD，直接开环叠转矩也能用 */
 	rt_int16_t torque;
@@ -50,7 +56,15 @@ static void motion_thread_entry(void *parameter)
 		/* angle pd controller.  */
         angle_feedback = -imu.roll; //-200~200
 		
-		torque = controller_output(&angle_controller, angle_ref, angle_feedback);
+		if ( (angle_feedback>-10) && (angle_feedback<10))
+		{
+			torque = controller_output(&angle_controller_1, angle_ref, angle_feedback);
+		}
+		else
+		{
+			torque = controller_output(&angle_controller_2, angle_ref, angle_feedback);
+		}
+		
 		
 		/* 叠加转向 */
         torque_left  = torque + torque_turn;

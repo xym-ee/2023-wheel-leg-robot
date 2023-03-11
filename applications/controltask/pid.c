@@ -16,15 +16,22 @@ double controller_output(controller_t *controller, double ref, double feedback)
     {
         controller->err_sum += controller->err;
     }
-
+	
+	/* 误差低通滤波 */
+	controller->err_lpf = controller->err_lpf1 + LPF_alpha*(controller->err - controller->err_lpf1);
+	
+	/* pid 控制器输出 */
     controller->output = controller->kp * controller->err + \
                          controller->ki * controller->err_sum + \
                          controller->kd * (controller->err - controller->err1);
 
+	
+	
     controller->err1 = controller->err;
+	controller->err_lpf1 = controller->err_lpf;
 
     /* 输出限幅 */
-    if (controller->out_lim > 1e-8)
+    if (controller->out_lim > 1e-8)	/* 输出限幅值不为0 */
     {
         if (controller->output > controller->out_lim)
             controller->output = controller->out_lim;

@@ -6,6 +6,13 @@
 #include <board.h>
 
 
+#define LPF_pi	3.141593
+#define LPF_fc	1
+#define LPF_Ts	0.005
+
+#define LPF_alpha ((2.0*LPF_pi*LPF_fc*LPF_Ts)/(2.0*LPF_pi*LPF_fc*LPF_Ts+1.0))
+
+
 typedef struct 
 {
     double ref;
@@ -21,6 +28,8 @@ typedef struct
     double int_lim;
     double int_boundary;
 
+	double err_lpf;
+	double err_lpf1;
     double err;
     double err1;
     double err_sum;
