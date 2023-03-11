@@ -93,7 +93,7 @@ static void can_tx_thread_entry(void *parameter)
 		iqControl = motor.left.control.torque;
 //		rt_kprintf("%d\n", iqControl);
 		
-		msg.id   = 0x141;	
+		msg.id   = 0x142;	
 		msg.data[4] = *(rt_uint8_t *)(&iqControl);
 		msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
 		
@@ -103,13 +103,13 @@ static void can_tx_thread_entry(void *parameter)
 //			rt_kprintf("can dev write data failed in left!\n");
 //		}
 		
-		rt_thread_mdelay(1);
+		rt_thread_mdelay(4);
 		
 		
 		iqControl = motor.right.control.torque;
 //		rt_kprintf("%d\n", iqControl);
 		
-		msg.id      = 0x142;
+		msg.id      = 0x141;
 		msg.data[4] = *(rt_uint8_t *)(&iqControl);
 		msg.data[5] = *((rt_uint8_t *)(&iqControl)+1);
 		
@@ -119,7 +119,7 @@ static void can_tx_thread_entry(void *parameter)
 //			rt_kprintf("can dev write data failed in right!\n");
 //		}
 		
-        rt_thread_mdelay(7);
+        rt_thread_mdelay(4);
     }
 }
 

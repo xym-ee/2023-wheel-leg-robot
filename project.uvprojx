@@ -409,6 +409,11 @@
               <FileType>1</FileType>
               <FilePath>.\applications\controltask\motion.c</FilePath>
             </File>
+            <File>
+              <FileName>lpf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\controltask\lpf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -423,6 +428,11 @@
               <FileName>imu.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\applications\iotask\imu.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\iotask\servo.c</FilePath>
             </File>
             <File>
               <FileName>motor_can.c</FileName>
