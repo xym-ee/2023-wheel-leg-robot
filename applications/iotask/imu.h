@@ -17,9 +17,14 @@
 
 typedef struct 
 {
-	rt_int32_t roll;	
-	rt_int32_t pitch;
-	rt_int32_t yaw;
+	double theta_x;	
+	double theta_y;
+	double theta_z;	
+	
+	double omega_x;	
+	double omega_y;
+	double omega_z;	
+		
 } 
 imu_t;
 

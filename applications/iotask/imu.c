@@ -68,15 +68,19 @@ static void imu_thread_entry(void *parameter)
 			data_count = data_count + rx_length;
                         
             /* 可以使用状态机解包 */
-            if (byte[0] == 0x55 && byte[1]==0x53)
+            if (byte[0] == 0x55 && byte[1]==0x52)
             {
                 /* 满足帧头才判断帧长 */
-                if (data_count >= 11) 
+                if (data_count >= 22) 
                 {
-					imu.roll  = ((rt_int16_t)(byte[3]<<8 | byte[2]))*1800/32768;
-					imu.pitch = ((rt_int16_t)(byte[5]<<8 | byte[4]))*1800/32768;		/* 1.5 deg = 15 舍去低位 */
-					imu.yaw   = ((rt_int16_t)(byte[7]<<8 | byte[6]))*1800/32768;
-					
+					imu.omega_x = ((rt_int16_t)(byte[3]<<8 | byte[2]))*2000.0/32768.0;  // 1deg/s 100
+					imu.omega_y = ((rt_int16_t)(byte[5]<<8 | byte[4]))*2000.0/32768.0;
+					imu.omega_z = ((rt_int16_t)(byte[7]<<8 | byte[6]))*2000.0/32768.0;
+
+					imu.theta_x = ((rt_int16_t)(byte[14]<<8 | byte[13]))*180.0/32768.0; // 1deg 100
+					imu.theta_y = ((rt_int16_t)(byte[16]<<8 | byte[15]))*180.0/32768.0;
+					imu.theta_z = ((rt_int16_t)(byte[18]<<8 | byte[17]))*180.0/32768.0;
+										
                     /* 准备下一数据帧接收 */
                     data_count = 0;
                 }
@@ -153,10 +157,12 @@ INIT_APP_EXPORT(imu_init);
 
 static void imu_debug_thread_entry(void *parameter)
 {
+	#define abs(x) (x<0? -x:x)
     while (1)
     {
         rt_kprintf("\x1b[2J\x1b[H");
-        rt_kprintf("%d \n", imu.roll);
+        rt_kprintf("%d.%03d \n", (rt_int32_t)imu.theta_x, abs((rt_int32_t)(imu.theta_x*1000))%1000);
+		rt_kprintf("%d.%03d \n", (rt_int32_t)imu.omega_x, abs((rt_int32_t)(imu.omega_x*1000))%1000);
         rt_thread_mdelay(50);
     }
 }

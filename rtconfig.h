@@ -79,10 +79,10 @@
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_CAN
 #define RT_USING_PIN
-#define RT_USING_PWM
 
 /* Using USB */
 
+#define RT_USING_USB
 
 /* C/C++ and POSIX layer */
 
@@ -136,9 +136,6 @@
 
 
 /* u8g2: a monochrome graphic library */
-
-
-/* PainterEngine: A cross-platform graphics application framework written in C language */
 
 
 /* tools packages */
@@ -213,6 +210,7 @@
 
 /* Other */
 
+
 /* Signal IO */
 
 
@@ -233,21 +231,10 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART6
-#define BSP_USING_UART2
-#define BSP_UART2_RX_USING_DMA
-#define BSP_USING_UART3
-#define BSP_USING_UART7
-#define BSP_USING_UART8
-#define BSP_UART8_RX_USING_DMA
 #define BSP_USING_UART1
 #define BSP_UART1_RX_USING_DMA
 #define BSP_USING_CAN
 #define BSP_USING_CAN1
-#define BSP_USING_PWM
-#define BSP_USING_PWM4
-#define BSP_USING_PWM4_CH1
-#define BSP_USING_PWM5
-#define BSP_USING_PWM5_CH4
 
 /* Board extended module Drivers */
 

@@ -90,6 +90,12 @@ menu "On-chip Peripheral Drivers"
                     default n
         endif
 
+    menuconfig RT_USING_USB
+        bool "Enable USB"
+        default n
+        select RT_USING_USB
+     
+
     config BSP_USING_SDIO
         bool "Enable SDIO"
         select RT_USING_SDIO
